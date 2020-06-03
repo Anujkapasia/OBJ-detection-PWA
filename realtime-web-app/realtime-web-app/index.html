@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"> </script> 
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"> </script> 
+        
+        
+        <meta charset="UTF-8" />
+        <link rel="icon" href="./images/my-lens-icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta
+            name="description"
+            content="My Lens - Realtime Object Detection"
+        />
+        
+        <link rel="apple-touch-icon" href="./images/my-lens-icon.png" />
+        <link rel="manifest" href="./manifest.json" />
+        <title>My Lens</title>
+        <style>
+            *{
+                padding:0;
+                margin:0;
+            }
+            body{
+                margin: none;
+                background-color: #364f6b;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            @media(max-width:500px){
+                html{
+                    height: 100vh;
+                    width:100vw;
+                    padding: none;
+                    margin: none;
+
+                }
+                
+            }
+            #video{
+                width:100%;
+                
+            }
+            #status{
+                width:100%;
+                height:30%;
+                position:fixed;
+                bottom:0;
+                border-radius:50px 50px 0 0;
+                background-color:#f0f0f0;
+                display:flex;
+                justify-content: center;
+                align-items: center;
+                font-size:1.5rem;
+                font-weight:bold;
+                color:#43dde6;
+                box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+            }
+
+            #class-name{
+                font-size: 2rem;
+                color:#fc5185;
+            }
+            #camN{
+                position:fixed;
+                color:#f0f0f0;
+                font-size: 40px;
+                top:30vw;
+                font-weight: bold;
+                width:100%;
+                text-align: center;
+                visibility: hidden;
+                z-index: 100;
+            }
+
+
+
+        </style>
+    </head>
+    <body>
+        
+        
+        <video id="video"   autoplay muted playsInLine></video>
+        <!-- <img id='img' src='./images/cat.png'   />  -->
+        <canvas id="canvas" style="display: none"   ></canvas>
+        <div id="status" >
+            <div>
+                
+                <div id="class-name" ></div>
+                <div id="probability" ></div>
+            </div>
+            
+        </div>
+        <div id="camN" >Camera Not Detected</div>
+        
+        
+    </body>
+</html>
+
+<script >
+    
+    if ('serviceWorker' in navigator){
+        window.addEventListener('load', ()=>{
+            navigator.serviceWorker.register('./serviceworker.js')
+                .then((reg)=> console.log('Success: ', reg.scope))
+                .catch((err)=> console.log('Faliure: ', err))
+        })
+    }
+
+
+
+    function app(){
+        const cam = document.getElementById("camN")
+        const video = document.getElementById('video')
+        const canvas = document.getElementById('canvas')
+        const context = canvas.getContext('2d')
+        const status = document.getElementById('status')
+        const classN = document.getElementById('class-name')
+        const probab = document.getElementById('probability')
+        
+
+        
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio:false, video: {facingMode:'environment'} })
+            .then(function (stream) {
+                
+                video.srcObject = stream;
+                
+            })
+            .catch(function (err0r) {
+                status.style.display = "none";
+                cam.style.visibility = "visible";
+            });
+        }
+
+        
+            mobilenet.load().then(model => {
+                predict()
+
+                async function predict(){
+                    canvas.width = video.clientWidth;
+                    canvas.height = video.clientHeight;
+                    context.drawImage(video,0,0)
+                    
+                    
+                        
+                        model.classify(canvas).then(predictions => {
+                            console.log(predictions)
+                            classN.innerHTML = `${predictions[0].className}`
+                            probab.innerHTML = `${predictions[0].probability}`
+                        });
+                    
+                    setTimeout( () => predict(), 1000)
+                }
+            })
+        }
+    
+
+    app()
+
+</script>
+
+

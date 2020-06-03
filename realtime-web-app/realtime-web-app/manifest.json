@@ -1,0 +1,17 @@
+{
+    "short_name" : "My Lens",
+    "name" : "My Lens PWA",
+    "icons":[
+        {
+            "src" : "./images/my-lens-icon.png",
+            "type" : "image/png",
+            "sizes": "200x200"
+            
+        }
+    ],
+    "start_url" : ".",
+    "display" : "standalone",
+    "theme_color" : "#ffffff",
+    "background_color" : "#364f6b"
+    
+}
